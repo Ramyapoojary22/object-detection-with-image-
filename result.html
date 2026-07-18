@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Detection Result</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif;}
+
+body{
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+}
+
+/* HEADER */
+.header{
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:rgba(0,0,0,0.4);
+}
+
+/* MAIN */
+.container{
+    display:flex;
+    gap:20px;
+    padding:30px;
+}
+
+/* IMAGE */
+.image-box{
+    flex:2;
+    background:rgba(255,255,255,0.08);
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.image-box img{
+    width:100%;
+    border-radius:15px;
+    transition:0.3s;
+}
+
+/* zoom effect */
+.image-box img:hover{
+    transform:scale(1.02);
+}
+
+/* SIDE */
+.side{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* CARD */
+.card{
+    background:rgba(255,255,255,0.08);
+    padding:20px;
+    border-radius:20px;
+}
+
+/* STAT */
+.stat{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    margin:8px 0;
+    border-radius:10px;
+    background:rgba(255,255,255,0.1);
+    transition:0.3s;
+}
+
+.stat:hover{
+    background:#00c6ff;
+    transform:scale(1.05);
+}
+
+/* DETAIL */
+.detail{
+    display:flex;
+    justify-content:space-between;
+    padding:8px;
+    font-size:14px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+/* SUMMARY */
+.summary{
+    background:#0072ff;
+    padding:15px;
+    border-radius:12px;
+    text-align:center;
+    font-weight:600;
+}
+
+/* EMPTY */
+.empty{
+    text-align:center;
+    color:#ccc;
+}
+
+/* BUTTON */
+.back-btn{
+    display:block;
+    text-align:center;
+    padding:12px;
+    border-radius:25px;
+    background:linear-gradient(45deg,#00c6ff,#0072ff);
+    color:white;
+    text-decoration:none;
+    transition:0.3s;
+}
+
+.back-btn:hover{
+    transform:scale(1.05);
+}
+
+/* download button */
+.download{
+    margin-top:10px;
+    text-align:center;
+    font-size:14px;
+    color:#00c6ff;
+    text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <h2>📊 Detection Dashboard</h2>
+    <a href="/logout">Logout</a>
+</div>
+
+<div class="container">
+
+    <!-- IMAGE -->
+    <div class="image-box">
+        <img src="{{ url_for('static', filename=image) }}">
+        <a class="download" href="{{ url_for('static', filename=image) }}" download>
+            ⬇ Download Image
+        </a>
+    </div>
+
+    <!-- SIDE -->
+    <div class="side">
+
+        <!-- SUMMARY -->
+        <div class="summary">
+            🧠 {{ summary if summary else "No clear objects detected" }}
+        </div>
+
+        <!-- COUNTS -->
+        <div class="card">
+            <h3>Detected Objects</h3>
+
+            {% if stats %}
+                {% for k,v in stats.items() %}
+                    <div class="stat">
+                        <span>{{ k }}</span>
+                        <span>{{ v }}</span>
+                    </div>
+                {% endfor %}
+
+                <div class="stat">
+                    <strong>Total</strong>
+                    <strong>{{ stats.values() | sum }}</strong>
+                </div>
+            {% else %}
+                <div class="empty">No objects detected</div>
+            {% endif %}
+        </div>
+
+        <!-- DETAILS -->
+        <div class="card">
+            <h3>🔍 Details</h3>
+
+            {% if objects %}
+                {% for obj in objects %}
+                <div class="detail">
+                    <span>{{ obj.name }}</span>
+                    <span>{{ obj.confidence }}%</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty">No details available</div>
+            {% endif %}
+        </div>
+
+        <a href="/home" class="back-btn">⬅ Try Another</a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

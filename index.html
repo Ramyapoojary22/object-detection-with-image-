@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Upload - AI Object Detection</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    height:100vh;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+/* animated background */
+body::before{
+    content:'';
+    position:absolute;
+    width:200%;
+    height:200%;
+    background: radial-gradient(circle,#00c6ff33,transparent);
+    animation: moveBg 8s linear infinite;
+}
+
+@keyframes moveBg{
+    0%{transform:translate(0,0);}
+    50%{transform:translate(-25%,-25%);}
+    100%{transform:translate(0,0);}
+}
+
+/* container */
+.container{
+    position:relative;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px);
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+    width:420px;
+    box-shadow:0 0 30px rgba(0,0,0,0.5);
+    animation: fadeIn 1s ease;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+/* upload box */
+.upload-box{
+    border:2px dashed #00c6ff;
+    padding:30px;
+    border-radius:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.upload-box.dragover{
+    background:rgba(0,198,255,0.2);
+}
+
+.upload-box input{
+    display:none;
+}
+
+/* preview image */
+.preview{
+    margin-top:15px;
+    display:none;
+}
+
+.preview img{
+    width:100%;
+    border-radius:10px;
+}
+
+/* file name */
+#file-name{
+    margin-top:10px;
+    font-size:14px;
+    color:#ccc;
+}
+
+/* button */
+button{
+    margin-top:20px;
+    padding:12px 25px;
+    border:none;
+    border-radius:25px;
+    background:linear-gradient(45deg,#00c6ff,#0072ff);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 0 15px #00c6ff;
+}
+
+/* logout */
+.logout{
+    position:absolute;
+    top:20px;
+    right:30px;
+    color:#00c6ff;
+    text-decoration:none;
+}
+
+/* flash message */
+.flash{
+    margin-bottom:10px;
+    padding:10px;
+    border-radius:8px;
+    background:#ff4d4d;
+}
+
+/* animation */
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+</style>
+
+</head>
+
+<body>
+
+<a href="/logout" class="logout">Logout</a>
+
+<div class="container">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <h2>🚀 Upload Image for Detection</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <label class="upload-box" id="dropArea">
+            Click or Drag Image Here
+            <input type="file" name="image" id="fileInput" accept="image/*" required>
+        </label>
+
+        <div id="file-name">No file chosen</div>
+
+        <!-- Image Preview -->
+        <div class="preview" id="previewBox">
+            <img id="previewImg">
+        </div>
+
+        <button type="submit">Detect Objects</button>
+    </form>
+</div>
+
+<script>
+const input = document.getElementById("fileInput");
+const fileName = document.getElementById("file-name");
+const previewImg = document.getElementById("previewImg");
+const previewBox = document.getElementById("previewBox");
+const dropArea = document.getElementById("dropArea");
+
+// File selection
+input.addEventListener("change", function(){
+    handleFile(this.files[0]);
+});
+
+// Drag & Drop
+dropArea.addEventListener("dragover", (e)=>{
+    e.preventDefault();
+    dropArea.classList.add("dragover");
+});
+
+dropArea.addEventListener("dragleave", ()=>{
+    dropArea.classList.remove("dragover");
+});
+
+dropArea.addEventListener("drop", (e)=>{
+    e.preventDefault();
+    dropArea.classList.remove("dragover");
+    const file = e.dataTransfer.files[0];
+    input.files = e.dataTransfer.files;
+    handleFile(file);
+});
+
+// Handle file
+function handleFile(file){
+    if(!file.type.startsWith("image/")){
+        alert("Please upload an image file!");
+        return;
+    }
+
+    fileName.textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        previewImg.src = e.target.result;
+        previewBox.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+}
+</script>
+
+</body>
+</html>

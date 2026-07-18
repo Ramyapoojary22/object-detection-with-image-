@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register - AI Object Detection</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif;}
+
+body{
+    height:100vh;
+    background: linear-gradient(135deg,#141e30,#243b55);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* background */
+body::before{
+    content:'';
+    position:absolute;
+    width:200%;
+    height:200%;
+    background: radial-gradient(circle,#0072ff33,transparent);
+    animation: moveBg 8s linear infinite;
+}
+@keyframes moveBg{
+    0%{transform:translate(0,0);}
+    50%{transform:translate(-25%,-25%);}
+    100%{transform:translate(0,0);}
+}
+
+/* container */
+.container{
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px);
+    padding:40px;
+    border-radius:20px;
+    width:320px;
+    text-align:center;
+    box-shadow:0 0 30px rgba(0,0,0,0.5);
+}
+
+h2{color:white;margin-bottom:20px;}
+
+/* flash */
+.flash{
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+    font-size:14px;
+}
+.flash.success{background:#2ecc71;}
+.flash.warning{background:#f39c12;}
+.flash.danger{background:#e74c3c;}
+
+/* input */
+.input-box{position:relative;margin:15px 0;}
+
+.input-box input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:rgba(255,255,255,0.2);
+    color:white;
+}
+
+.input-box label{
+    position:absolute;
+    left:10px;
+    top:12px;
+    color:#ddd;
+    font-size:14px;
+    transition:0.3s;
+}
+
+.input-box input:focus + label,
+.input-box input:valid + label{
+    top:-8px;
+    left:5px;
+    font-size:12px;
+    color:#00c6ff;
+}
+
+/* toggle */
+.toggle{
+    position:absolute;
+    right:10px;
+    top:12px;
+    cursor:pointer;
+    font-size:12px;
+    color:#00c6ff;
+}
+
+/* strength + match */
+.info{
+    font-size:12px;
+    text-align:left;
+    margin-top:5px;
+}
+
+/* button */
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:25px;
+    background:linear-gradient(45deg,#0072ff,#00c6ff);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+}
+
+button:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+/* loading */
+.loading{
+    display:none;
+    margin-top:10px;
+    font-size:13px;
+    color:#00c6ff;
+}
+
+a{
+    display:block;
+    margin-top:15px;
+    color:#00c6ff;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📝 Create Account</h2>
+
+    <!-- Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" onsubmit="return validateForm()">
+
+        <div class="input-box">
+            <input type="text" name="username" required autofocus autocomplete="username">
+            <label>Username</label>
+        </div>
+
+        <div class="input-box">
+            <input type="password" id="password" name="password" required onkeyup="checkStrength()" autocomplete="new-password">
+            <label>Password</label>
+            <span class="toggle" onclick="togglePassword('password')">Show</span>
+        </div>
+
+        <div class="info" id="strengthText"></div>
+
+        <div class="input-box">
+            <input type="password" id="confirm" required onkeyup="checkMatch()">
+            <label>Confirm Password</label>
+            <span class="toggle" onclick="togglePassword('confirm')">Show</span>
+        </div>
+
+        <div class="info" id="matchText"></div>
+
+        <button id="registerBtn" type="submit">Register</button>
+        <div class="loading" id="loadingText">Creating account...</div>
+    </form>
+
+    <a href="/">Already have an account? Login</a>
+</div>
+
+<script>
+function togglePassword(id){
+    const field = document.getElementById(id);
+    field.type = field.type === "password" ? "text" : "password";
+}
+
+// better password strength
+function checkStrength(){
+    const pass = document.getElementById("password").value;
+    const text = document.getElementById("strengthText");
+
+    let strength = 0;
+    if(pass.length >= 6) strength++;
+    if(/[A-Z]/.test(pass)) strength++;
+    if(/[0-9]/.test(pass)) strength++;
+    if(/[^A-Za-z0-9]/.test(pass)) strength++;
+
+    if(strength <= 1){
+        text.textContent = "Weak password";
+        text.style.color = "red";
+    } else if(strength <= 3){
+        text.textContent = "Medium strength";
+        text.style.color = "orange";
+    } else {
+        text.textContent = "Strong password";
+        text.style.color = "lightgreen";
+    }
+}
+
+// live match check
+function checkMatch(){
+    const pass = document.getElementById("password").value;
+    const confirm = document.getElementById("confirm").value;
+    const text = document.getElementById("matchText");
+
+    if(confirm === "") {
+        text.textContent = "";
+        return;
+    }
+
+    if(pass === confirm){
+        text.textContent = "Passwords match";
+        text.style.color = "lightgreen";
+    } else {
+        text.textContent = "Passwords do not match";
+        text.style.color = "red";
+    }
+}
+
+// submit
+function validateForm(){
+    const pass = document.getElementById("password").value;
+    const confirm = document.getElementById("confirm").value;
+
+    if(pass !== confirm){
+        alert("Passwords do not match!");
+        return false;
+    }
+
+    document.getElementById("registerBtn").disabled = true;
+    document.getElementById("loadingText").style.display = "block";
+
+    return true;
+}
+</script>
+
+</body>
+</html>
